@@ -34,9 +34,13 @@ void xor_linked_list_append(Xor_Linked_List *list, Xor_Element *element) {
 
 Xor_Element *xor_linked_list_pop_back(Xor_Linked_List *list) {
     Xor_Element *res = list->last;
-    Xor_Element *second_to_last = (Xor_Element *) list->last->delta_pointer /* ^ NULL */;
-    second_to_last->delta_pointer = second_to_last->delta_pointer ^ (uintptr_t) list->last;
-    list->last = second_to_last;
+    if (list->last == list->first) {
+        list->last = list->first = NULL;
+    } else {
+        Xor_Element *second_to_last = (Xor_Element *) list->last->delta_pointer /* ^ NULL */;
+        second_to_last->delta_pointer = second_to_last->delta_pointer ^ (uintptr_t) list->last;
+        list->last = second_to_last;
+    }
     return res;
 }
 
@@ -54,9 +58,13 @@ void xor_linked_list_push(Xor_Linked_List *list, Xor_Element *element) {
 
 Xor_Element *xor_linked_list_pop_front(Xor_Linked_List *list) {
     Xor_Element *res = list->first;
-    Xor_Element *second = (Xor_Element *) list->first->delta_pointer /* ^ NULL */;
-    second->delta_pointer = second->delta_pointer ^ (uintptr_t) list->first;
-    list->first = second;
+    if (list->first == list->last) {
+        list->first = list->last = NULL;
+    } else {
+        Xor_Element *second = (Xor_Element *) list->first->delta_pointer /* ^ NULL */;
+        second->delta_pointer = second->delta_pointer ^ (uintptr_t) list->first;
+        list->first = second;
+    }
     return res;
 }
 
@@ -101,6 +109,18 @@ struct Node {
     Xor_Element list;
     int val;
 };
+
+int main2(void) {
+    Xor_Linked_List list = {0};
+    Node *node = calloc(1, sizeof(Node));
+    assert(node != NULL);
+    node->val = 666;
+    xor_linked_list_push(&list, (Xor_Element *) node);
+    xor_linked_list_pop_front(&list);
+    assert(list.first == list.last);
+    assert(list.first == NULL);
+    return 0;
+}
 
 int main(void) {
     Xor_Linked_List list = {0};
