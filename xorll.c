@@ -72,6 +72,13 @@ void xor_iterate_insert(Xor_Iterator *it, Xor_Element *element) {
     it->next = element;
 }
 
+void xor_iterato_remove(Xor_Iterator *it) {
+    Xor_Element *prev_prev = (Xor_Element *) (it->prev->delta_pointer ^ (uintptr_t) it->next);
+    prev_prev->delta_pointer = prev_prev->delta_pointer ^ (uintptr_t) it->prev ^ (uintptr_t) it->next;
+    it->next->delta_pointer = it->next->delta_pointer ^ (uintptr_t) it->prev ^ (uintptr_t) prev_prev;
+    it->prev = prev_prev;
+}
+
 // Example usage
 typedef struct Node Node;
 struct Node {
@@ -102,6 +109,8 @@ int main(void) {
         xor_iterate_insert(&it, (Xor_Element *) node);
         Node *next = (Node *) xor_iterate_next(&it);
         assert(next == node);
+        xor_iterato_remove(&it);
+        assert(((Node *)it.prev)->val == 1);
     }
 
     {
