@@ -99,7 +99,7 @@ int main(void) {
         }
     }
 
-    {
+    { // insert 99 in the middle of the list and then remove it again
         Xor_Iterator it = xor_linked_list_iterate(list);
         for (int i = 0; i < 5; ++i) {
             xor_iterate_next(&it);
@@ -113,7 +113,7 @@ int main(void) {
         assert(((Node *)it.prev)->val == 1);
     }
 
-    {
+    { // iterate through the list and print it out
         Xor_Iterator it = xor_linked_list_iterate(list);
         while (it.next) {
             Node *node = (Node *) xor_iterate_next(&it);
@@ -123,7 +123,7 @@ int main(void) {
 
     printf("-----------------------------------------------\n");
 
-    {
+    { // reveres the list in O(1) and iterate through it, printing out each element
         xor_linked_list_reverse(&list); // O(1)
         Xor_Iterator it = xor_linked_list_iterate(list);
         while (it.next) {
