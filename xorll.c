@@ -35,7 +35,7 @@ void xor_linked_list_append(Xor_Linked_List *list, Xor_Element *element) {
 void xor_linked_list_push(Xor_Linked_List *list, Xor_Element *element) {
     if (list->first == NULL) {
         assert(list->last == NULL && "If first is null, last should also be null");
-        list->first = list->last = element;
+        list->first = list->last = element /* ^ NULL */;
     } else {
         assert(list->last && "If first is not null, last should also be not null");
         element->delta_pointer = (uintptr_t) list->first;
@@ -66,6 +66,10 @@ Xor_Element *xor_iterate_next(Xor_Iterator *it) {
 }
 
 void xor_iterate_insert(Xor_Iterator *it, Xor_Element *element) {
+    element->delta_pointer = (uintptr_t) it->prev ^ (uintptr_t) it->next;
+    it->prev->delta_pointer = it->prev->delta_pointer ^ (uintptr_t) it->next ^ (uintptr_t) element;
+    it->next->delta_pointer = it->next->delta_pointer ^ (uintptr_t) it->prev ^ (uintptr_t) element;
+    it->next = element;
 }
 
 // Example usage
@@ -86,6 +90,18 @@ int main(void) {
         } else {
             xor_linked_list_push(&list, (Xor_Element *) node);
         }
+    }
+
+    {
+        Xor_Iterator it = xor_linked_list_iterate(list);
+        for (int i = 0; i < 5; ++i) {
+            xor_iterate_next(&it);
+        }
+        Node *node = calloc(1, sizeof(Node));
+        node->val = 99;
+        xor_iterate_insert(&it, (Xor_Element *) node);
+        Node *next = (Node *) xor_iterate_next(&it);
+        assert(next == node);
     }
 
     {
