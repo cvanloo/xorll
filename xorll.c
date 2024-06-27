@@ -32,6 +32,14 @@ void xor_linked_list_append(Xor_Linked_List *list, Xor_Element *element) {
     }
 }
 
+Xor_Element *xor_linked_list_remove(Xor_Linked_List *list) {
+    Xor_Element *res = list->last;
+    Xor_Element *second_to_last = (Xor_Element *) list->last->delta_pointer /* ^ NULL */;
+    second_to_last->delta_pointer = second_to_last->delta_pointer ^ (uintptr_t) list->last;
+    list->last = second_to_last;
+    return res;
+}
+
 void xor_linked_list_push(Xor_Linked_List *list, Xor_Element *element) {
     if (list->first == NULL) {
         assert(list->last == NULL && "If first is null, last should also be null");
@@ -42,6 +50,14 @@ void xor_linked_list_push(Xor_Linked_List *list, Xor_Element *element) {
         list->first->delta_pointer = list->first->delta_pointer ^ (uintptr_t) element;
         list->first = element;
     }
+}
+
+Xor_Element *xor_linked_list_pop(Xor_Linked_List *list) {
+    Xor_Element *res = list->first;
+    Xor_Element *second = (Xor_Element *) list->first->delta_pointer /* ^ NULL */;
+    second->delta_pointer = second->delta_pointer ^ (uintptr_t) list->first;
+    list->first = second;
+    return res;
 }
 
 void xor_linked_list_reverse(Xor_Linked_List *list) {
@@ -125,6 +141,26 @@ int main(void) {
 
     { // reveres the list in O(1) and iterate through it, printing out each element
         xor_linked_list_reverse(&list); // O(1)
+        Xor_Iterator it = xor_linked_list_iterate(list);
+        while (it.next) {
+            Node *node = (Node *) xor_iterate_next(&it);
+            printf("%d\n", node->val);
+        }
+    }
+
+    printf("-----------------------------------------------\n");
+    {
+        xor_linked_list_pop(&list);
+        Xor_Iterator it = xor_linked_list_iterate(list);
+        while (it.next) {
+            Node *node = (Node *) xor_iterate_next(&it);
+            printf("%d\n", node->val);
+        }
+    }
+
+    printf("-----------------------------------------------\n");
+    {
+        xor_linked_list_remove(&list);
         Xor_Iterator it = xor_linked_list_iterate(list);
         while (it.next) {
             Node *node = (Node *) xor_iterate_next(&it);
